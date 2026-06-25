@@ -453,10 +453,10 @@ function fbg(n){const c=tc(n),r=parseInt(c.slice(1,3),16),g2=parseInt(c.slice(3,
 // PRESET GROUP STAGE MATCHES (Matchday 3 - June 24-27, 2026)
 const PRESET=[
   // ═══ JORNADA 3 (p0-p23) ═══
-  {round:'grupos',group:'A',f1:'🇨🇿',t1:'Chequia',f2:'🇲🇽',t2:'México',date:'2026-06-24T16:00'},
-  {round:'grupos',group:'A',f1:'🇿🇦',t1:'Sudáfrica',f2:'🇰🇷',t2:'Corea del Sur',date:'2026-06-24T16:00'},
-  {round:'grupos',group:'B',f1:'🇨🇦',t1:'Canadá',f2:'🇨🇭',t2:'Suiza',date:'2026-06-24T20:00'},
-  {round:'grupos',group:'B',f1:'🇶🇦',t1:'Qatar',f2:'🇧🇦',t2:'Bosnia',date:'2026-06-24T20:00'},
+  {round:'grupos',group:'A',f1:'🇨🇿',t1:'Chequia',f2:'🇲🇽',t2:'México',date:'2026-06-24T16:00',rg1:0,rg2:3},
+  {round:'grupos',group:'A',f1:'🇿🇦',t1:'Sudáfrica',f2:'🇰🇷',t2:'Corea del Sur',date:'2026-06-24T16:00',rg1:1,rg2:0},
+  {round:'grupos',group:'B',f1:'🇨🇦',t1:'Canadá',f2:'🇨🇭',t2:'Suiza',date:'2026-06-24T20:00',rg1:0,rg2:2},
+  {round:'grupos',group:'B',f1:'🇶🇦',t1:'Qatar',f2:'🇧🇦',t2:'Bosnia',date:'2026-06-24T20:00',rg1:1,rg2:3},
   {round:'grupos',group:'C',f1:'🇧🇷',t1:'Brasil',f2:'🏴󠁧󠁢󠁳󠁣󠁴󠁿',t2:'Escocia',date:'2026-06-25T16:00'},
   {round:'grupos',group:'C',f1:'🇭🇹',t1:'Haití',f2:'🇲🇦',t2:'Marruecos',date:'2026-06-25T16:00'},
   {round:'grupos',group:'D',f1:'🇹🇷',t1:'Turquía',f2:'🇺🇸',t2:'USA',date:'2026-06-25T20:00'},
@@ -2078,8 +2078,17 @@ function initFirebase(config){
   }catch(e){console.error('Firebase init error:',e);return false;}
 }
 function _fixPresetErrors(){
-  const fixes={p0:{f1:'🇨🇿',t1:'Chequia',f2:'🇲🇽',t2:'México'},p1:{f1:'🇿🇦',t1:'Sudáfrica',f2:'🇰🇷',t2:'Corea del Sur'},p6:{f1:'🇹🇷',t1:'Turquía',f2:'🇺🇸',t2:'USA'},p7:{f1:'🇵🇾',t1:'Paraguay',f2:'🇦🇺',t2:'Australia'}};
-  G.m.forEach(m=>{if(fixes[m.id])Object.assign(m,fixes[m.id]);});
+  const fixes={
+    p0:{f1:'🇨🇿',t1:'Chequia',f2:'🇲🇽',t2:'México',rg1:0,rg2:3},
+    p1:{f1:'🇿🇦',t1:'Sudáfrica',f2:'🇰🇷',t2:'Corea del Sur',rg1:1,rg2:0},
+    p2:{rg1:0,rg2:2},
+    p3:{rg1:1,rg2:3},
+    p6:{f1:'🇹🇷',t1:'Turquía',f2:'🇺🇸',t2:'USA'},
+    p7:{f1:'🇵🇾',t1:'Paraguay',f2:'🇦🇺',t2:'Australia'}
+  };
+  let changed=false;
+  G.m.forEach(m=>{if(fixes[m.id]){Object.assign(m,fixes[m.id]);changed=true;}});
+  return changed;
 }
 function _mergePreset(){
   if(!G.m)G.m=[];
@@ -2099,11 +2108,11 @@ function startFirebaseSync(){
       if(!G.p)G.p=[];
       if(!G.m)G.m=[];
       if(!G.preds)G.preds={};
-      _fixPresetErrors();
+      const _fixed1=_fixPresetErrors();
       const _added=_mergePreset();
       const _seen={};G.p=G.p.filter(p=>{const k=p.name.toLowerCase();if(_seen[k])return false;_seen[k]=true;return true;});
       try{const u=localStorage.getItem('cod26-me');if(u){const p=JSON.parse(u);if(p&&G.p.find(x=>x.id===p.id))me=p;}}catch(e){}
-      const _golesFixed1=!data.goles||data.goles.length<10;if(_added||_golesFixed1)saveG();
+      const _golesFixed1=!data.goles||data.goles.length<10;if(_added||_golesFixed1||_fixed1)saveG();
     }
     fbReady=true;
     hideFbLoading();
@@ -2119,11 +2128,11 @@ function startFirebaseSync(){
         if(!G.prizes)G.prizes={p1:'',p2:'',p3:'',p4:''};
         if(!G.goles||G.goles.length<10)G.goles=GOLES_INIT.map(g=>({...g}));
         if(!G.p)G.p=[];
-        _fixPresetErrors();
+        const _fixed2=_fixPresetErrors();
         const _added2=_mergePreset();
         const seen={};G.p=G.p.filter(p=>{const k=p.name.toLowerCase();if(seen[k])return false;seen[k]=true;return true;});
         if(oldMe)me=G.p.find(x=>x.id===oldMe.id)||null;
-        const _golesFixed=!d.goles||d.goles.length<10;if(_added2||_golesFixed)saveG();
+        const _golesFixed=!d.goles||d.goles.length<10;if(_added2||_golesFixed||_fixed2)saveG();
         renderLB();
         const activeTab=document.querySelector('.nb.on')?.id?.replace('nb-','');
         if(activeTab&&activeTab!=='lb')({mx:renderMX,pr:renderPR,fi:renderFichaScreen,ad:renderAd,al:renderAlbum}[activeTab])?.();
