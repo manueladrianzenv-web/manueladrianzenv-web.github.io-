@@ -63,11 +63,11 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;bac
 .mcphase{font-size:8px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--p)}
 .mcgrp{font-size:8px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold)}
 .teams-row{display:flex;align-items:center;gap:5px}
-.tside{display:flex;align-items:center;gap:7px;flex:1;min-width:0}
-.tside.rv{flex-direction:row-reverse}
+.tside{display:flex;align-items:center;justify-content:center;flex-direction:column;gap:3px;flex:1;min-width:0}
+.tside.rv{flex-direction:column}
 .tflag{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0;border:1.5px solid transparent}
-.tn{font-size:12px;font-weight:800;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.tn.ra{text-align:right}.tsb{font-size:8.5px;color:var(--t3);margin-top:1px}.tsb.ra{text-align:right}
+.tn{font-size:10px;font-weight:800;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:center;max-width:100%}
+.tn.ra{text-align:center}.tsb{font-size:8.5px;color:var(--t3);margin-top:1px;text-align:center}.tsb.ra{text-align:center}
 .sz{display:flex;align-items:center;gap:4px;flex-shrink:0}
 .sb{width:40px;height:40px;background:rgba(0,0,0,.05);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:900;color:var(--t1);border:1.5px solid var(--bg4);flex-shrink:0;transition:all .2s}
 .sb.set{border-color:rgba(124,58,237,.4);background:#0e0a20;color:#a78bfa}
@@ -847,17 +847,54 @@ function renderMX(){
 }
 function swRnd(r){curRnd=r;killT();renderMX();}
 // ─── GOLEADORES ───
+const PLAYER_WIKI={
+  'Lionel Messi':'Lionel_Messi',
+  'Kylian Mbappé':'Kylian_Mbappé',
+  'Erling Haaland':'Erling_Haaland',
+  'Deniz Undav':'Deniz_Undav',
+  'Jonathan David':'Jonathan_David_(Canadian_soccer_player)',
+  'Vinicius Jr.':'Vinícius_Júnior',
+  'Cody Gakpo':'Cody_Gakpo',
+  'Ayase Ueda':'Ueda_Ayase',
+  'Mikel Oyarzabal':'Mikel_Oyarzabal',
+  'Folarin Balogun':'Folarin_Balogun',
+  'Lamine Yamal':'Lamine_Yamal',
+  'Thomas Müller':'Thomas_Müller',
+  'Robert Lewandowski':'Robert_Lewandowski',
+  'Cristiano Ronaldo':'Cristiano_Ronaldo',
+  'Neymar':'Neymar',
+  'Harry Kane':'Harry_Kane',
+  'Antoine Griezmann':'Antoine_Griezmann',
+};
+function fetchPlayerPhoto(name,imgId,flgId){
+  const title=PLAYER_WIKI[name]||name.replace(/ /g,'_');
+  fetch('https://en.wikipedia.org/api/rest_v1/page/summary/'+encodeURIComponent(title))
+    .then(r=>r.ok?r.json():null)
+    .then(data=>{
+      if(!data?.thumbnail?.source)return;
+      const img=document.getElementById(imgId);
+      if(!img)return;
+      img.src=data.thumbnail.source;
+      img.style.display='block';
+      const flg=document.getElementById(flgId);
+      if(flg)flg.style.display='none';
+    }).catch(()=>{});
+}
+function _photoAvatar(flag,imgId,flgId){
+  return`<div style="position:relative;width:36px;height:36px;border-radius:50%;overflow:hidden;flex-shrink:0;background:rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center"><span id="${flgId}" style="font-size:20px;line-height:1">${flag}</span><img id="${imgId}" src="" style="display:none;width:100%;height:100%;object-fit:cover;object-position:top center;position:absolute;inset:0" onerror="this.style.display='none';var f=document.getElementById('${flgId}');if(f)f.style.display='block'"></div>`;
+}
 function goleadoresTopHtml(){
   if(!G.goles||!G.goles.length)return '';
   const sorted=[...G.goles].sort((a,b)=>b.goals-a.goals).slice(0,10);
   const medals=['🥇','🥈','🥉'];
   let rows=sorted.map((g,i)=>`<div style="display:flex;align-items:center;gap:8px;padding:5px 0;${i<sorted.length-1?'border-bottom:1px solid rgba(255,255,255,.05)':''}">
     <span style="font-size:14px;min-width:20px;text-align:center">${medals[i]||''}</span>
-    <span style="font-size:18px">${g.flag}</span>
+    ${_photoAvatar(g.flag,'pimg-t-'+i,'pflg-t-'+i)}
     <div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:800;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${g.name}</div><div style="font-size:9px;color:var(--t4)">${g.team}</div></div>
     <div style="font-size:20px;font-weight:900;color:#22c55e;min-width:24px;text-align:right">${g.goals}</div>
   </div>`).join('');
   const editBtn=aOpen?`<button class="btn btn-g" style="width:100%;margin-top:8px;font-size:11px;padding:6px" onclick="openGolesModal()">✏️ Editar goleadores</button>`:'';
+  setTimeout(()=>sorted.forEach((g,i)=>fetchPlayerPhoto(g.name,'pimg-t-'+i,'pflg-t-'+i)),0);
   return `<div style="background:rgba(34,197,94,.05);border:1px solid rgba(34,197,94,.2);border-radius:14px;padding:12px 14px;margin-bottom:13px">
     <div style="font-size:9px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:#22c55e;margin-bottom:8px">⚽ GOLEADORES</div>
     ${rows}
@@ -882,7 +919,7 @@ function goleadoresHtml(){
     html+=`<div style="background:${isTop?'rgba(34,197,94,.06)':'rgba(255,255,255,.02)'};border:1px solid ${isTop?'rgba(34,197,94,.2)':'rgba(255,255,255,.05)'};border-radius:14px;padding:12px 14px;margin-bottom:7px">
       <div style="display:flex;align-items:center;gap:10px">
         <div style="width:24px;text-align:center;flex-shrink:0">${rankEl}</div>
-        <div style="font-size:22px;flex-shrink:0">${g.flag}</div>
+        ${_photoAvatar(g.flag,'pimg-f-'+i,'pflg-f-'+i)}
         <div style="flex:1;min-width:0">
           <div style="font-size:13px;font-weight:900;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${g.name}</div>
           <div style="font-size:10px;color:var(--t3);margin-top:1px">${g.team}</div>
@@ -898,6 +935,7 @@ function goleadoresHtml(){
     </div>`;
   });
   if(aOpen)html+=`<button class="btn btn-g" style="width:100%;margin-top:8px;font-size:12px" onclick="openGolesModal()">✏️ Editar tabla de goleadores</button>`;
+  setTimeout(()=>sorted.forEach((g,i)=>fetchPlayerPhoto(g.name,'pimg-f-'+i,'pflg-f-'+i)),0);
   return `<div>${html}</div>`;
 }
 function openGolesModal(){openGolesAdminModal();openM('m-goles');}
@@ -964,9 +1002,9 @@ function mcHtml(m,pid,editable,qual){
   return`<div class="mcard" style="border-color:${bc}">
     <div class="mchdr">${grpBadge}<div style="display:flex;align-items:center;gap:5px">${timeBadge}${cdBadge}${rBadge()}${statusBadge}</div></div>
     <div class="teams-row">
-      <div class="tside"><div class="tflag" style="${tfS(m.t1)}">${m.f1}</div><div style="flex:1;min-width:0"><div class="tn">${m.t1}</div>${qual&&qual.has(m.t1)?'<div style="display:inline-block;background:#059669;color:#fff;font-size:7px;font-weight:800;padding:1px 6px;border-radius:3px;letter-spacing:.8px;margin-top:2px">✓ CLASIF.</div>':''}${editable&&!d?`<div class="tsb">max +${(RND_PTS[m.round]||2)+3} pts</div>`:''}</div></div>
+      <div class="tside"><div class="tflag" style="${tfS(m.t1)}">${m.f1}</div><div class="tn">${m.t1}</div>${qual&&qual.has(m.t1)?'<div style="background:#059669;color:#fff;font-size:7px;font-weight:800;padding:1px 6px;border-radius:3px;letter-spacing:.8px">✓ CLASIF.</div>':''}${editable&&!d?`<div class="tsb">max +${(RND_PTS[m.round]||2)+3} pts</div>`:''}</div>
       ${scoreH()}
-      <div class="tside rv"><div class="tflag" style="${tfS(m.t2)}">${m.f2}</div><div style="flex:1;min-width:0"><div class="tn ra">${m.t2}</div>${qual&&qual.has(m.t2)?'<div style="text-align:right"><span style="display:inline-block;background:#059669;color:#fff;font-size:7px;font-weight:800;padding:1px 6px;border-radius:3px;letter-spacing:.8px;margin-top:2px">✓ CLASIF.</span></div>':''}</div></div>
+      <div class="tside rv"><div class="tflag" style="${tfS(m.t2)}">${m.f2}</div><div class="tn">${m.t2}</div>${qual&&qual.has(m.t2)?'<div style="background:#059669;color:#fff;font-size:7px;font-weight:800;padding:1px 6px;border-radius:3px;letter-spacing:.8px">✓ CLASIF.</div>':''}</div>
     </div>
     ${penH()}${extH()}
     ${lk&&!d?`<div class="lock-strip">🔒 Partido en curso · Predicciones bloqueadas</div>`:''}
@@ -1155,7 +1193,7 @@ function renderFicha(){
     </div>
     <div style="font-size:8.5px;color:var(--t4);margin-top:12px;text-align:center;letter-spacing:1px">⚽ Club del Odio · Polla Mundial 2026</div>
   </div>
-  ${dm.length?`<div class="ph"><div class="phl">Partido a partido</div><div class="phln"></div></div>${dm.map(m=>{const pred=G.preds[pid]?.[m.id];const r=pred?calcPts(m,pred):null;const bc=!r?'rgba(255,255,255,.05)':r.pts>=r.max?'rgba(16,185,129,.25)':r.pts>0?'rgba(245,158,11,.2)':'rgba(239,68,68,.15)';const w=won(m.rg1,m.rg2);return`<div class="mcard" style="border-color:${bc}"><div class="mchdr">${m.group?`<span class="grp-pill">${m.group}</span>`:''}<span class="mcphase" style="margin-left:4px">${RND_N[m.round]}</span>${r?`<span class="badge ${r.pts>=r.max?'b-done':r.pts>0?'b-open':'b-lock'}">+${r.pts}/${r.max+3} pts</span>`:`<span class="badge" style="background:var(--bg4);color:var(--t3)">Sin pred.</span>`}</div><div class="teams-row"><div class="tside"><div class="tflag" style="${tfS(m.t1)}">${m.f1}</div><div style="flex:1;min-width:0"><div class="tn">${m.t1}</div></div></div><div class="sz"><div class="sb ${w==='t1'?'win':w==='d'?'set':'lss'}">${m.rg1}</div><div class="sdash">–</div><div class="sb ${w==='t2'?'win':w==='d'?'set':'lss'}">${m.rg2}</div></div><div class="tside rv"><div class="tflag" style="${tfS(m.t2)}">${m.f2}</div><div style="flex:1;min-width:0"><div class="tn ra">${m.t2}</div></div></div></div>${pred?`<div style="text-align:center;font-size:10px;color:var(--t3);margin-top:6px">Pred: <strong style="color:var(--t2)">${pred.g1}–${pred.g2}</strong>${pred.scorer?' · ⚽ '+pred.scorer:''}${pred.halfGoal!==undefined?' · 🕐 '+(pred.halfGoal?'Sí':'No'):''}</div>`:''}${r?`<div style="margin-top:9px;padding-top:9px;border-top:1px solid rgba(0,0,0,.06)">${r.bd.map(b=>`<div style="display:flex;justify-content:space-between;font-size:10px;color:var(--t3);padding:2px 0"><span>${b.ok?'✅':'❌'} ${b.l}</span><span style="color:${b.p>0?'#10b981':'var(--t4)'};font-weight:800">${b.p>0?'+'+b.p:'0'}</span></div>`).join('')}</div>`:''}</div>`;}).join('')}`:dm.length===0?`<div class="empty"><div class="ei">⏳</div><p style="font-size:12px;color:var(--t3)">Sin resultados aún</p></div>`:''}
+  ${dm.length?`<div class="ph"><div class="phl">Partido a partido</div><div class="phln"></div></div>${dm.map(m=>{const pred=G.preds[pid]?.[m.id];const r=pred?calcPts(m,pred):null;const bc=!r?'rgba(255,255,255,.05)':r.pts>=r.max?'rgba(16,185,129,.25)':r.pts>0?'rgba(245,158,11,.2)':'rgba(239,68,68,.15)';const w=won(m.rg1,m.rg2);return`<div class="mcard" style="border-color:${bc}"><div class="mchdr">${m.group?`<span class="grp-pill">${m.group}</span>`:''}<span class="mcphase" style="margin-left:4px">${RND_N[m.round]}</span>${r?`<span class="badge ${r.pts>=r.max?'b-done':r.pts>0?'b-open':'b-lock'}">+${r.pts}/${r.max+3} pts</span>`:`<span class="badge" style="background:var(--bg4);color:var(--t3)">Sin pred.</span>`}</div><div class="teams-row"><div class="tside"><div class="tflag" style="${tfS(m.t1)}">${m.f1}</div><div class="tn">${m.t1}</div></div><div class="sz"><div class="sb ${w==='t1'?'win':w==='d'?'set':'lss'}">${m.rg1}</div><div class="sdash">–</div><div class="sb ${w==='t2'?'win':w==='d'?'set':'lss'}">${m.rg2}</div></div><div class="tside rv"><div class="tflag" style="${tfS(m.t2)}">${m.f2}</div><div class="tn">${m.t2}</div></div></div>${pred?`<div style="text-align:center;font-size:10px;color:var(--t3);margin-top:6px">Pred: <strong style="color:var(--t2)">${pred.g1}–${pred.g2}</strong>${pred.scorer?' · ⚽ '+pred.scorer:''}${pred.halfGoal!==undefined?' · 🕐 '+(pred.halfGoal?'Sí':'No'):''}</div>`:''}${r?`<div style="margin-top:9px;padding-top:9px;border-top:1px solid rgba(0,0,0,.06)">${r.bd.map(b=>`<div style="display:flex;justify-content:space-between;font-size:10px;color:var(--t3);padding:2px 0"><span>${b.ok?'✅':'❌'} ${b.l}</span><span style="color:${b.p>0?'#10b981':'var(--t4)'};font-weight:800">${b.p>0?'+'+b.p:'0'}</span></div>`).join('')}</div>`:''}</div>`;}).join('')}`:dm.length===0?`<div class="empty"><div class="ei">⏳</div><p style="font-size:12px;color:var(--t3)">Sin resultados aún</p></div>`:''}
   <button class="btn btn-sh" onclick="shareF('${pid}')">📤 Compartir en redes</button>`;
 }
 function shareF(pid){
