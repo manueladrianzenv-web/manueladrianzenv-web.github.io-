@@ -109,6 +109,14 @@ input[type=password]::-webkit-credentials-auto-fill-button,input[type=password]:
 .cd.hot{color:#f87171;background:rgba(239,68,68,.07);border-color:rgba(239,68,68,.2);animation:bk .85s infinite}
 @keyframes bk{0%,100%{opacity:1}50%{opacity:.3}}
 .lock-strip{display:flex;align-items:center;justify-content:center;gap:5px;background:rgba(239,68,68,.05);border:1px solid rgba(239,68,68,.1);border-radius:9px;padding:6px;margin-top:8px;font-size:11px;font-weight:700;color:#f87171}
+.cd-bar{display:flex;align-items:center;justify-content:center;gap:6px;padding:8px 12px;margin:6px 0 4px;border-radius:10px;background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.2)}
+.cd-bar.cd-hot{background:rgba(239,68,68,.07);border-color:rgba(239,68,68,.25);animation:bk .85s infinite}
+.cd-bar.cd-crit{background:rgba(239,68,68,.13);border-color:rgba(239,68,68,.45);animation:bk .45s infinite}
+.cd-lbl{font-size:8px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--t3)}
+.cd-num{font-size:22px;font-weight:900;font-variant-numeric:tabular-nums;letter-spacing:1px;color:var(--gold);line-height:1}
+.cd-bar.cd-hot .cd-num,.cd-bar.cd-crit .cd-num{color:#f87171}
+.cd-bar.cd-hot .cd-lbl{color:#f87171}
+@keyframes lockFlash{0%{opacity:1}40%{opacity:.15}100%{opacity:1}}
 .reg-card{background:rgba(255,255,255,.9);border:1px solid rgba(124,58,237,.2);border-radius:16px;padding:18px;margin-bottom:12px;box-shadow:0 2px 16px rgba(0,0,0,.06)}
 .uchip{display:flex;align-items:center;gap:9px;background:rgba(124,58,237,.07);border:1px solid rgba(124,58,237,.2);border-radius:12px;padding:9px 12px;margin-bottom:12px}
 .swbtn{font-size:9.5px;color:var(--p);font-weight:800;background:var(--pb);border:none;cursor:pointer;padding:5px 10px;border-radius:7px;-webkit-appearance:none}
@@ -709,6 +717,21 @@ function tl(m){
   if(h>=24)return Math.floor(h/24)+'d '+(h%24)+'h';
   if(h>0)return h+'h '+mn+'m';if(mn>0)return mn+'m '+s+'s';return s+'s';
 }
+// Returns {text, cls} for the large countdown bar — MM:SS in last hour
+function cdFmt(m){
+  if(!m.date)return null;
+  const d=new Date(m.date)-Date.now();
+  if(d<=0)return null;
+  const h=Math.floor(d/3600000),mn=Math.floor((d%3600000)/60000),s=Math.floor((d%60000)/1000);
+  let text,cls='';
+  if(h>=24){text=Math.floor(h/24)+'d '+(h%24)+'h';cls='';}
+  else if(h>=1){text=h+'h '+String(mn).padStart(2,'0')+'m';cls='';}
+  else if(mn>=1||s>0){text=String(mn).padStart(2,'0')+':'+String(s).padStart(2,'0');cls=mn<10?'cd-hot':'';}
+  else{text='00:00';cls='cd-crit';}
+  if(d<300000)cls='cd-crit'; // <5 min always critical
+  else if(d<3600000&&cls==='')cls='cd-hot';
+  return{text,cls};
+}
 function hot(m){if(!m.date)return false;const d=new Date(m.date)-Date.now();return d>0&&d<3600000;}
 function calcPts(m,pred){
   if(!done(m)||!pred||pred.g1===undefined||pred.g1===null)return null;
@@ -1073,8 +1096,16 @@ function mcHtml(m,pid,editable,qual){
   const timeBadge=m.date&&!d?`<span style="font-size:9.5px;color:var(--t3);font-weight:600">${fmtTime(m.date)}</span>`:'';
   const cdBadge=tlv&&!d?`<span class="cd ${hott?'hot':''}" id="cd-${m.id}-${pid||'v'}">${tlv}</span>`:'';
   const statusBadge=d?`<span class="badge b-done">RESULTADO</span>`:lk?`<span class="badge b-lock">🔒 EN CURSO</span>`:`<span class="badge b-open">ABIERTO</span>`;
+  const cdf=!d&&m.date&&!lk?cdFmt(m):null;
+  const cdBar=cdf?`<div class="cd-bar ${cdf.cls}" id="cdb-${m.id}-${pid||'v'}">
+    <div style="text-align:center">
+      <div class="cd-lbl">${editable?'⏱ Predicciones cierran en':'⏱ Comienza en'}</div>
+      <div class="cd-num">${cdf.text}</div>
+    </div>
+  </div>`:lk&&!d?`<div class="cd-bar cd-crit" style="animation:lockFlash .6s 3"><div style="text-align:center"><div class="cd-lbl">🔒 Predicciones cerradas</div><div class="cd-num" style="font-size:14px">PARTIDO EN CURSO</div></div></div>`:'';
   return`<div class="mcard" style="border-color:${bc}">
     <div class="mchdr">${grpBadge}<div style="display:flex;align-items:center;gap:5px">${timeBadge}${cdBadge}${rBadge()}${statusBadge}</div></div>
+    ${cdBar}
     <div class="teams-row">
       <div class="tside"><div class="tflag" style="${tfS(m.t1)}">${m.f1}</div><div class="tn">${m.t1}</div>${qual&&qual.has(m.t1)?'<div style="background:#059669;color:#fff;font-size:7px;font-weight:800;padding:1px 6px;border-radius:3px;letter-spacing:.8px">✓ CLASIF.</div>':''}${editable&&!d?`<div class="tsb">max +${(RND_PTS[m.round]||2)+3} pts</div>`:''}</div>
       ${scoreH()}
@@ -1088,9 +1119,25 @@ function mcHtml(m,pid,editable,qual){
 function startTickers(pref,ms){
   ms.filter(m=>!done(m)&&tl(m)).forEach(m=>{
     const t=setInterval(()=>{
-      const el=document.getElementById(`cd-${m.id}-${pref}`);if(!el){clearInterval(t);return;}
-      const v=tl(m);if(!v){clearInterval(t);if(pref==='mx')renderMX();else renderPRBody(me?.id);return;}
-      el.textContent=v;el.className='cd'+(hot(m)?' hot':'');
+      // Update small header badge
+      const el=document.getElementById(`cd-${m.id}-${pref}`);
+      const v=tl(m);
+      if(!v){
+        clearInterval(t);
+        if(pref==='mx')renderMX();else renderPRBody(me?.id);
+        return;
+      }
+      if(el){el.textContent=v;el.className='cd'+(hot(m)?' hot':'');}
+      // Update large countdown bar
+      const bar=document.getElementById(`cdb-${m.id}-${pref}`);
+      if(bar){
+        const cf=cdFmt(m);
+        if(cf){
+          const numEl=bar.querySelector('.cd-num');
+          if(numEl)numEl.textContent=cf.text;
+          bar.className='cd-bar '+cf.cls;
+        }
+      }
     },1000);tickers.push(t);
   });
 }
