@@ -945,23 +945,130 @@ function renderMX(){
 function swRnd(r){curRnd=r;killT();renderMX();}
 // ─── GOLEADORES ───
 const PLAYER_WIKI={
-  'Lionel Messi':'Lionel_Messi',
-  'Kylian Mbappé':'Kylian_Mbappé',
-  'Erling Haaland':'Erling_Haaland',
-  'Deniz Undav':'Deniz_Undav',
-  'Jonathan David':'Jonathan_David_(Canadian_soccer_player)',
-  'Vinicius Jr.':'Vinícius_Júnior',
-  'Cody Gakpo':'Cody_Gakpo',
-  'Ayase Ueda':'Ueda_Ayase',
-  'Mikel Oyarzabal':'Mikel_Oyarzabal',
-  'Folarin Balogun':'Folarin_Balogun',
-  'Lamine Yamal':'Lamine_Yamal',
-  'Thomas Müller':'Thomas_Müller',
-  'Robert Lewandowski':'Robert_Lewandowski',
-  'Cristiano Ronaldo':'Cristiano_Ronaldo',
-  'Neymar':'Neymar',
-  'Harry Kane':'Harry_Kane',
-  'Antoine Griezmann':'Antoine_Griezmann',
+  // ── Long names (goalscorer table) ──
+  'Lionel Messi':'Lionel_Messi','Kylian Mbappé':'Kylian_Mbappé','Erling Haaland':'Erling_Haaland',
+  'Deniz Undav':'Deniz_Undav','Jonathan David':'Jonathan_David_(Canadian_soccer_player)',
+  'Vinicius Jr.':'Vinícius_Júnior','Cody Gakpo':'Cody_Gakpo','Ayase Ueda':'Ueda_Ayase',
+  'Mikel Oyarzabal':'Mikel_Oyarzabal','Folarin Balogun':'Folarin_Balogun',
+  'Lamine Yamal':'Lamine_Yamal','Thomas Müller':'Thomas_Müller',
+  'Robert Lewandowski':'Robert_Lewandowski','Cristiano Ronaldo':'Cristiano_Ronaldo',
+  'Harry Kane':'Harry_Kane','Antoine Griezmann':'Antoine_Griezmann',
+  // ── Short album names (SQUADS format) ──
+  // Argentina
+  'L. Messi':'Lionel_Messi','J. Álvarez':'Julián_Álvarez','P. Dybala':'Paulo_Dybala',
+  'A. Garnacho':'Alejandro_Garnacho','R. De Paul':'Rodrigo_De_Paul',
+  'A. Mac Allister':'Alexis_Mac_Allister','E. Martínez':'Emiliano_Martínez',
+  // Brasil
+  'Vinicius Jr.':'Vinícius_Júnior','Rodrygo':'Rodrygo','Raphinha':'Raphinha',
+  'Endrick':'Endrick','Alisson':'Alisson_Becker','Marquinhos':'Marquinhos_(footballer)',
+  'Casemiro':'Casemiro','L. Paquetá':'Lucas_Paquetá','G. Magalhães':'Gabriel_Magalhães',
+  'É. Militão':'Éder_Militão',
+  // Francia
+  'Mbappé':'Kylian_Mbappé','Griezmann':'Antoine_Griezmann','Dembélé':'Ousmane_Dembélé',
+  'Camavinga':'Eduardo_Camavinga','Tchouaméni':'Aurélien_Tchouaméni',
+  'T. Hernández':'Theo_Hernández','W. Saliba':'William_Saliba','Maignan':'Mike_Maignan',
+  'M. Thuram':'Marcus_Thuram','Upamecano':'Dayot_Upamecano',
+  // Inglaterra
+  'Kane':'Harry_Kane','Bellingham':'Jude_Bellingham','Saka':'Bukayo_Saka',
+  'Foden':'Phil_Foden','Alexander-Arnold':'Trent_Alexander-Arnold','Rice':'Declan_Rice',
+  'Rashford':'Marcus_Rashford','Pickford':'Jordan_Pickford','Walker':'Kyle_Walker',
+  // España
+  'Yamal':'Lamine_Yamal','Pedri':'Pedri_(footballer)','Rodri':'Rodri_(footballer,_born_2001)',
+  'Olmo':'Dani_Olmo','Gavi':'Gavi_(footballer)','Morata':'Álvaro_Morata',
+  'Fabián Ruiz':'Fabián_Ruiz','Unai Simón':'Unai_Simón','Carvajal':'Dani_Carvajal',
+  'N. Williams':'Nico_Williams',
+  // Alemania
+  'Wirtz':'Florian_Wirtz','Musiala':'Jamal_Musiala','Havertz':'Kai_Havertz',
+  'Sané':'Leroy_Sané','Kimmich':'Joshua_Kimmich','Rüdiger':'Antonio_Rüdiger',
+  'Neuer':'Manuel_Neuer','Gündoğan':'İlkay_Gündoğan','Brandt':'Julian_Brandt',
+  'Gnabry':'Serge_Gnabry','Füllkrug':'Niclas_Füllkrug',
+  // Portugal
+  'Ronaldo':'Cristiano_Ronaldo','Félix':'João_Félix','Leão':'Rafael_Leão',
+  'B. Fernandes':'Bruno_Fernandes_(Portuguese_footballer)','B. Silva':'Bernardo_Silva',
+  'Vitinha':'Vitinha_(footballer)','R. Dias':'Rúben_Dias','Cancelo':'João_Cancelo',
+  'N. Mendes':'Nuno_Mendes','Palhinha':'João_Palhinha','J. Neves':'João_Neves',
+  // Países Bajos
+  'De Jong':'Frenkie_de_Jong','Van Dijk':'Virgil_van_Dijk','Gakpo':'Cody_Gakpo',
+  'Simons':'Xavi_Simons','Reijnders':'Tijjani_Reijnders','Dumfries':'Denzel_Dumfries',
+  'Depay':'Memphis_Depay','Weghorst':'Wout_Weghorst','Flekken':'Mark_Flekken',
+  'Zirkzee':'Joshua_Zirkzee',
+  // Bélgica
+  'De Bruyne':'Kevin_De_Bruyne','Lukaku':'Romelu_Lukaku','Doku':'Jérémy_Doku',
+  'Tielemans':'Youri_Tielemans','Courtois':'Thibaut_Courtois','Onana':'Amadou_Onana',
+  'Carrasco':'Yannick_Carrasco','Openda':'Lois_Openda',
+  // Uruguay
+  'F. Valverde':'Federico_Valverde','D. Núñez':'Darwin_Núñez','R. Araújo':'Ronald_Araújo',
+  'Bentancur':'Rodrigo_Bentancur','De Arrascaeta':'Giorgian_de_Arrascaeta',
+  'Rochet':'Sergio_Rochet','Olivera':'Mathías_Olivera','Ugarte':'Manuel_Ugarte',
+  // Colombia
+  'L. Díaz':'Luis_Díaz_(Colombian_footballer)','J. Rodríguez':'James_Rodríguez',
+  'Caicedo M.':'Moisés_Caicedo','R. Falcao':'Radamel_Falcao',
+  // México
+  'H. Lozano':'Hirving_Lozano','S. Giménez':'Santiago_Giménez','R. Jiménez':'Raúl_Jiménez',
+  'C. Rodríguez':'Carlos_Rodríguez_(Mexican_footballer)','H. Herrera':'Héctor_Herrera',
+  'Ochoa':'Guillermo_Ochoa',
+  // USA
+  'Pulisic':'Christian_Pulisic','Musah':'Yunus_Musah','Reyna':'Giovanni_Reyna',
+  'McKennie':'Weston_McKennie','Adams':'Tyler_Adams','Turner':'Matt_Turner',
+  'Weah':'Timothy_Weah','Balogun':'Folarin_Balogun',
+  // Japón
+  'T. Kubo':'Takefusa_Kubo','K. Mitoma':'Kaoru_Mitoma','W. Endō':'Wataru_Endō',
+  'H. Morita':'Hioki_Morita','D. Kamada':'Daichi_Kamada','A. Ueda':'Ayase_Ueda',
+  'T. Minamino':'Takumi_Minamino',
+  // Corea del Sur
+  'Son Heung-min':'Son_Heung-min','Lee Kang-in':'Lee_Kang-in','Kim Min-jae':'Kim_Min-jae',
+  'Hwang Hee-chan':'Hwang_Hee-chan','Cho Gue-sung':'Cho_Gue-sung',
+  // Marruecos
+  'Hakimi':'Achraf_Hakimi','En-Nesyri':'Youssef_En-Nesyri','Ziyech':'Hakim_Ziyech',
+  'S. Amrabat':'Sofyan_Amrabat','Ounahi':'Azzedine_Ounahi','El Khannouss':'Bilal_El_Khannouss',
+  'Bono':'Yassine_Bounou','Aguerd':'Nayef_Aguerd',
+  // Senegal
+  'Mané':'Sadio_Mané','I. Sarr':'Ismaïla_Sarr','Koulibaly':'Kalidou_Koulibaly',
+  'I. Gueye':'Idrissa_Gueye','E. Mendy':'Édouard_Mendy','B. Dia':'Boulaye_Dia',
+  'N. Jackson':'Nicolas_Jackson',
+  // Croacia
+  'Modrić':'Luka_Modrić','Gvardiol':'Joško_Gvardiol','Kovačić':'Mateo_Kovačić',
+  'Kramarić':'Andrej_Kramarić','Brozović':'Marcelo_Brozović','Livaković':'Dominik_Livaković',
+  'Perišić':'Ivan_Perišić','Pašalić':'Mario_Pašalić',
+  // Turquía
+  'A. Güler':'Arda_Güler','H. Çalhanoğlu':'Hakan_Çalhanoğlu','M. Demiral':'Merih_Demiral',
+  'K. Aktürkoğlu':'Kerem_Aktürkoğlu',
+  // Noruega
+  'Haaland':'Erling_Haaland','Ødegaard':'Martin_Ødegaard','Berge':'Sander_Berge',
+  'Nusa':'Antonio_Nusa','Sørloth':'Alexander_Sørloth',
+  // Suecia
+  'Isak':'Alexander_Isak','Gyökeres':'Viktor_Gyökeres','Kulusevski':'Dejan_Kulusevski',
+  'Forsberg':'Emil_Forsberg','Elanga':'Anthony_Elanga',
+  // Suiza
+  'Xhaka':'Granit_Xhaka','Embolo':'Breel_Embolo','Akanji':'Manuel_Akanji',
+  'Freuler':'Remo_Freuler','Ndoye':'Dan_Ndoye','Sommer':'Yann_Sommer',
+  // Austria
+  'Sabitzer':'Marcel_Sabitzer','Arnautovic':'Marko_Arnautović','Alaba':'David_Alaba',
+  // Irán
+  'Taremi':'Mehdi_Taremi','Azmoun':'Sardar_Azmoun',
+  // Egipto
+  'M. Salah':'Mohamed_Salah','O. Marmoush':'Omar_Marmoush',
+  // Argelia
+  'Mahrez':'Riyad_Mahrez','Bennacer':'Ismaël_Bennacer',
+  // Ghana
+  'Partey':'Thomas_Partey','Kudus':'Mohammed_Kudus',
+  // Chequia
+  'Schick':'Patrik_Schick','Souček':'Tomáš_Souček',
+  // Bosnia
+  'Džeko':'Edin_Džeko','Pjanić':'Miralem_Pjanić',
+  // Uzbekistán
+  'Shomurodov':'Eldor_Shomurodov',
+  // Escocia
+  'McTominay':'Scott_McTominay','Robertson A.':'Andrew_Robertson','Gilmour':'Billy_Gilmour',
+  // Canadá
+  'A. Davies':'Alphonso_Davies','J. David':'Jonathan_David_(Canadian_soccer_player)',
+  'S. Eustáquio':'Stephen_Eustáquio','T. Buchanan':'Tajon_Buchanan',
+  // Ecuador
+  'Caicedo M.':'Moisés_Caicedo','Hincapié':'Piero_Hincapié','Valencia E.':'Enner_Valencia',
+  // Sudáfrica
+  'Tau':'Percy_Tau',
+  // Senegal extra
+  'F. Mendy':'Ferland_Mendy',
 };
 function fetchPlayerPhoto(name,imgId,flgId){
   const title=PLAYER_WIKI[name]||name.replace(/ /g,'_');
@@ -973,6 +1080,9 @@ function fetchPlayerPhoto(name,imgId,flgId){
       if(!img)return;
       img.src=data.thumbnail.source;
       img.style.display='block';
+      img.style.objectFit='cover';
+      img.style.objectPosition='top center';
+      img.style.filter='saturate(1.5) contrast(1.12) brightness(1.06)';
       const flg=document.getElementById(flgId);
       if(flg)flg.style.display='none';
     }).catch(()=>{});
@@ -1841,25 +1951,28 @@ function showReveal(cards){
     const isStar=STARS.has(p.name);
     const isGold=GOLD.has(p.name);
     const isTit=TITULARES.has(p.name);
+    const needsPhoto=isTit||isStar||isGold; // ALL stars/gold/titulars get real photo
     if(isStar||isGold)hasStars=true;
     const skin=SKIN_MAP[p.country]||'light';
     const seed=encodeURIComponent(p.name+p.country);
     const avatarUrl=`https://api.dicebear.com/9.x/avataaars/svg?seed=${seed}&skinColor=${skin}&backgroundColor=transparent`;
-    const photoUrl=getPhotoUrl(p.name);
-    // Titulares con foto (real o wikipedia async); no-titulares con avatar
-    const imgSrc=isTit?(photoUrl||avatarUrl):avatarUrl;
-    const imgFit=isTit&&photoUrl?'cover':'contain';
-    const imgFilter=isTit&&photoUrl?'filter:saturate(1.5) contrast(1.12) brightness(1.06);':'';
+    // Always start with avatar; REST API replaces it async for needsPhoto players
     const goldStyle=isGold
       ?'background:linear-gradient(135deg,rgba(120,80,0,.18),rgba(40,30,0,.22));border:2px solid #f59e0b;box-shadow:0 0 16px rgba(245,158,11,.5),inset 0 0 8px rgba(245,158,11,.06);'
       :'';
+    // Duplicate badge with count
+    const dupCount=!p.isNew?(AL.dups?.[p.id]||0):0;
+    const badgeTxt=p.isNew?'🌟 NUEVA':dupCount>1?`🔄 ×${dupCount}`:'🔄 REPETIDA';
+    const badgeBg=p.isNew?'rgba(124,58,237,.3)':'rgba(239,68,68,.2)';
+    const badgeClr=p.isNew?'#a78bfa':'#f87171';
     return`<div class="al-card${p.isNew?' al-card-new':''}${isStar?' star-card':''}" style="animation-delay:${i*.1}s;${goldStyle}padding:10px 12px;position:relative;overflow:hidden" id="reveal-card-${i}">
       ${isGold?`<div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#92400e,#f59e0b,#fbbf24,#f59e0b,#92400e)"></div>`:''}
       <div style="display:flex;align-items:center;gap:10px">
-        <div style="position:relative;width:56px;height:56px;${isGold?'border-radius:9px':'border-radius:50%'};overflow:hidden;flex-shrink:0;background:rgba(255,255,255,.06);${isGold?'box-shadow:0 0 10px rgba(245,158,11,.35)':''}">
-          <img id="rcimg-${i}" src="${imgSrc}"
-            style="width:100%;height:100%;object-fit:${imgFit};object-position:top center;${imgFilter}"
-            onerror="this.onerror=null;this.src='${avatarUrl}'">
+        <div style="position:relative;width:56px;height:56px;${isGold?'border-radius:9px':'border-radius:50%'};overflow:hidden;flex-shrink:0;background:rgba(255,255,255,.08);${isGold?'box-shadow:0 0 10px rgba(245,158,11,.35)':''}">
+          <img id="rcimg-${i}" src="${avatarUrl}"
+            style="width:100%;height:100%;object-fit:contain;object-position:center"
+            data-fb="${avatarUrl}"
+            onerror="this.onerror=null;this.src=this.dataset.fb">
         </div>
         <div style="flex:1;min-width:0">
           <div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap">
@@ -1870,30 +1983,34 @@ function showReveal(cards){
           <div style="font-size:11px;color:var(--t3);margin-top:1px">${p.country} · ${posL[p.pos]} · <span style="color:${posC[p.pos]};font-weight:800">#${JERSEYS[p.name]||'—'}</span></div>
           ${isGold?'<div style="font-size:9px;letter-spacing:1.2px;color:#f59e0b;font-weight:800;margin-top:3px;text-transform:uppercase">✨ Figurita Dorada</div>':''}
           ${isTit&&!isGold?'<div style="font-size:8px;color:#a78bfa;margin-top:2px">👕 Titular</div>':''}
+          ${!p.isNew?`<div style="font-size:8px;color:#f87171;margin-top:2px">🗂 Acumulada en repetidas</div>`:''}
         </div>
-        <div style="font-size:10px;font-weight:800;padding:3px 8px;border-radius:99px;flex-shrink:0;background:${p.isNew?'rgba(124,58,237,.3)':'rgba(255,255,255,.08)'};color:${p.isNew?'#a78bfa':'#666'}">${p.isNew?'🌟 NEW':'🔄 Repeat'}</div>
+        <div style="font-size:10px;font-weight:800;padding:3px 8px;border-radius:99px;flex-shrink:0;background:${badgeBg};color:${badgeClr}">${badgeTxt}</div>
       </div>
     </div>`;
   }).join('');
-  // Async fetch Wikipedia photos for titulares without pre-defined photo
+  // Async-fetch real Wikipedia photo for ALL titulares + stars + gold players
   setTimeout(()=>{
     cards.forEach((p,i)=>{
-      if(!TITULARES.has(p.name)||getPhotoUrl(p.name))return;
+      const needsPhoto=TITULARES.has(p.name)||STARS.has(p.name)||GOLD.has(p.name);
+      if(!needsPhoto)return;
       const img=document.getElementById('rcimg-'+i);
       if(!img)return;
-      const skin=SKIN_MAP[p.country]||'light';
-      const fallback=`https://api.dicebear.com/9.x/avataaars/svg?seed=${encodeURIComponent(p.name+p.country)}&skinColor=${skin}&backgroundColor=transparent`;
-      const title=PLAYER_WIKI[p.name]||p.name.replace(/[^a-zA-ZÀ-ÿ0-9 .]/g,'_').replace(/ /g,'_');
+      // Resolve Wikipedia article title: explicit mapping takes priority
+      const title=PLAYER_WIKI[p.name]
+        ||(p.name.includes('.')? null : p.name.replace(/ /g,'_')); // skip initials like 'L. Messi' without a mapping
+      if(!title)return; // can't guess article for abbreviated names
       fetch('https://en.wikipedia.org/api/rest_v1/page/summary/'+encodeURIComponent(title))
         .then(r=>r.ok?r.json():null)
         .then(data=>{
           if(!data?.thumbnail?.source)return;
           img.src=data.thumbnail.source;
-          img.style.objectFit='cover';img.style.objectPosition='top center';
+          img.style.objectFit='cover';
+          img.style.objectPosition='top center';
           img.style.filter='saturate(1.5) contrast(1.12) brightness(1.06)';
         }).catch(()=>{});
     });
-  },200);
+  },150);
   rev.scrollIntoView({behavior:'smooth',block:'nearest'});
   if(hasStars){
     setTimeout(()=>{
