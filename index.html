@@ -1088,19 +1088,25 @@ function doReg(){
     showT('Ese nombre ya existe — ingresá tu contraseña','err');closeM('m-reg');setTimeout(openLoginModal,600);return;
   }
   _doRegBusy=true;
-  const emoji=EMOJIS[Math.floor(Math.random()*EMOJIS.length)];
-  const p={id:Date.now().toString(),name,emoji};
-  if(passRaw)p.pass=simpleHash(passRaw);
-  G.p.push(p);me=p;saveG();saveMe();
-  setTimeout(()=>{_doRegBusy=false;},3000);
-  AL=loadAL();
-  if((AL.packs||0)<3){AL.packs=20;}
-  AL.lastPackDay=new Date().toISOString().slice(0,10);
-  AL.packsToday=0;
-  saveAL();
-  document.getElementById('reg-form').style.display='none';
-  document.getElementById('reg-success-name').textContent='¡Bienvenido/a, '+name+'! 🎉';
-  document.getElementById('reg-success').style.display='block';
+  try{
+    const emoji=EMOJIS[Math.floor(Math.random()*EMOJIS.length)];
+    const p={id:Date.now().toString(),name,emoji};
+    if(passRaw)p.pass=simpleHash(passRaw);
+    G.p.push(p);me=p;saveG();saveMe();
+    loadAL();
+    if((AL.packs||0)<3){AL.packs=20;}
+    AL.lastPackDay=new Date().toISOString().slice(0,10);
+    AL.packsToday=0;
+    saveAL();
+    document.getElementById('reg-form').style.display='none';
+    document.getElementById('reg-success-name').textContent='¡Bienvenido/a, '+name+'! 🎉';
+    document.getElementById('reg-success').style.display='block';
+  }catch(err){
+    console.error('doReg error:',err);
+    showT('Error al registrar, intentá de nuevo','err');
+  }finally{
+    _doRegBusy=false;
+  }
 }
 function logAs(pid){const p=G.p.find(x=>x.id===pid);if(!p)return;me=p;saveMe();renderPR();showT('✅ ¡Hola de nuevo, '+p.name+'!');}
 function swUser(){me=null;saveMe();renderPR();}
@@ -2130,14 +2136,15 @@ function startFirebaseSync(){
 }
 function showFbLoading(){document.getElementById('fb-loading').style.display='flex';}
 function hideFbLoading(){document.getElementById('fb-loading').style.display='none';}
-// Override saveG to use Firebase
-const _origSaveG=saveG;
+// Override saveG to use Firebase when available
 let _fbSaveTs=0;
 function saveG(){
   if(fbRef&&fbReady){
     _fbSaveTs=Date.now();
     fbRef.set(G).catch(e=>console.error('Firebase save error:',e));
-  } else _origSaveG();
+  }else{
+    localStorage.setItem('cod26',JSON.stringify(G));
+  }
 }
 // Login functions
 function openLoginModal(){
