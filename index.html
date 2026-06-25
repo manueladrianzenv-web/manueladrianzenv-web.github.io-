@@ -1918,6 +1918,21 @@ const SKIN_MAP={
   'Cabo Verde':'brown','Argelia':'brown','Sudáfrica':'brown','Haití':'darkBrown','Curazao':'brown'
 };
 function alCollected(){return Object.keys(AL.col).length;}
+// Returns true when the tournament is in the knockout phase (16avos or beyond).
+// Checks if any non-grupos match has a recorded score, or if today >= first R16 date.
+function isKnockoutPhase(){
+  if(MATCHES.some(m=>m.round!=='grupos'&&(m.rg1!=null||m.g1!=null)))return true;
+  const firstR16=MATCHES.find(m=>m.round==='16avos');
+  if(firstR16?.date&&new Date(firstR16.date)<=new Date())return true;
+  return false;
+}
+// Resolve a Wikipedia article title from a player name.
+// Returns null if the name looks like an abbreviation (e.g. "L. Messi") and has no mapping.
+function wikiTitle(name){
+  if(PLAYER_WIKI[name])return PLAYER_WIKI[name];
+  if(/\.\s/.test(name)||/^[A-ZÁÉÍÓÚ]\.$/.test(name.split(' ')[0]))return null;
+  return name.replace(/ /g,'_');
+}
 // pNew formula tuned so a fully-dedicated player (20 packs/day every day) completes
 // the 832-card album in ~20 days → ~10% of players finish during the 38-day tournament.
 // Curve: 70% new-card probability at start, drops to 28% when album is nearly full.
@@ -1954,7 +1969,8 @@ function showReveal(cards){
     const isStar=STARS.has(p.name);
     const isGold=GOLD.has(p.name);
     const isTit=TITULARES.has(p.name);
-    const needsPhoto=isTit||isStar||isGold; // ALL stars/gold/titulars get real photo
+    const knockout=isKnockoutPhase();
+    const needsPhoto=knockout||isTit||isStar||isGold; // knockout: everyone; groups: stars/titulares only
     if(isStar||isGold)hasStars=true;
     const skin=SKIN_MAP[p.country]||'light';
     const seed=encodeURIComponent(p.name+p.country);
@@ -1992,17 +2008,16 @@ function showReveal(cards){
       </div>
     </div>`;
   }).join('');
-  // Async-fetch real Wikipedia photo for ALL titulares + stars + gold players
+  // Async-fetch real Wikipedia photo for eligible players
   setTimeout(()=>{
+    const knockout=isKnockoutPhase();
     cards.forEach((p,i)=>{
-      const needsPhoto=TITULARES.has(p.name)||STARS.has(p.name)||GOLD.has(p.name);
-      if(!needsPhoto)return;
+      const eligible=knockout||TITULARES.has(p.name)||STARS.has(p.name)||GOLD.has(p.name);
+      if(!eligible)return;
       const img=document.getElementById('rcimg-'+i);
       if(!img)return;
-      // Resolve Wikipedia article title: explicit mapping takes priority
-      const title=PLAYER_WIKI[p.name]
-        ||(p.name.includes('.')? null : p.name.replace(/ /g,'_')); // skip initials like 'L. Messi' without a mapping
-      if(!title)return; // can't guess article for abbreviated names
+      const title=wikiTitle(p.name);
+      if(!title)return;
       fetch('https://en.wikipedia.org/api/rest_v1/page/summary/'+encodeURIComponent(title))
         .then(r=>r.ok?r.json():null)
         .then(data=>{
@@ -2159,7 +2174,7 @@ function renderAlbumGrid(){
       const isStar=STARS.has(name);
       const isGold=GOLD.has(name);
       const isTit=TITULARES.has(name);
-      const needsWiki=isStar||isGold||isTit; // fetch real photo via REST API for these
+      const needsWiki=isKnockoutPhase()||isStar||isGold||isTit;
       const seed=encodeURIComponent(name+country);
       const avatarUrl=`https://api.dicebear.com/9.x/avataaars/svg?seed=${seed}&skinColor=${skin}&backgroundColor=transparent`;
       const shortName=name.length>9?name.slice(0,9)+'…':name;
@@ -2217,7 +2232,7 @@ function fetchAlbumPhotos(){
     if(img.dataset.loaded)return;
     img.dataset.loaded='1';
     const name=img.dataset.wn;
-    const title=PLAYER_WIKI[name]||(name.includes('.')?null:name.replace(/ /g,'_'));
+    const title=wikiTitle(name);
     if(!title)return;
     fetch('https://en.wikipedia.org/api/rest_v1/page/summary/'+encodeURIComponent(title))
       .then(r=>r.ok?r.json():null)
