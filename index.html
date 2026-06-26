@@ -1959,7 +1959,7 @@ function wikiTitle(name){
   if(/\.\s/.test(name)||/^[A-ZÁÉÍÓÚ]\.$/.test(name.split(' ')[0]))return null;
   return name.replace(/ /g,'_');
 }
-// pNew formula tuned so a fully-dedicated player (20 packs/day every day) completes
+// pNew formula tuned so a fully-dedicated player (100 packs/day every day) completes
 // the 832-card album in ~20 days → ~10% of players finish during the 38-day tournament.
 // Curve: 70% new-card probability at start, drops to 28% when album is nearly full.
 function calcPNew(ratio){return ratio>0?Math.min(0.85,0.28+ratio*0.42):0;}
@@ -2311,7 +2311,7 @@ function generateOnePack(){
   }
   return cards;
 }
-const DAILY_LIMIT=20;
+const DAILY_LIMIT=100;
 function checkDailyRefill(){
   const today=new Date().toISOString().slice(0,10);
   if(AL.lastPackDay!==today){
