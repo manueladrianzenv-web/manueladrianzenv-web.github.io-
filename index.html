@@ -2549,15 +2549,20 @@ function initFirebase(config){
   }catch(e){console.error('Firebase init error:',e);return false;}
 }
 function _fixPresetErrors(){
-  // General: copy rg1/rg2 from PRESET into any stored match that still has null scores.
-  // Called after every Firebase load so new results in PRESET propagate automatically.
+  // Sync static bracket fields (teams, flags, date, round) and results from PRESET.
+  // Called after every Firebase load so PRESET changes propagate automatically.
   if(!G.m)return false;
   let changed=false;
   PRESET.forEach((pm,i)=>{
-    if(pm.rg1==null&&pm.rg2==null)return;
     const stored=G.m.find(m=>m.id==='p'+i);
-    if(!stored||stored.rg1!=null||stored.rg2!=null)return;
-    stored.rg1=pm.rg1;stored.rg2=pm.rg2;changed=true;
+    if(!stored)return;
+    // Always sync structural fields that admins update in PRESET (bracket draw, team names)
+    ['f1','t1','f2','t2','round','group','date'].forEach(k=>{
+      if(pm[k]!=null&&stored[k]!==pm[k]){stored[k]=pm[k];changed=true;}
+    });
+    // Only fill scores when not yet set (don't overwrite manually-entered results)
+    if(pm.rg1!=null&&stored.rg1==null){stored.rg1=pm.rg1;changed=true;}
+    if(pm.rg2!=null&&stored.rg2==null){stored.rg2=pm.rg2;changed=true;}
   });
   return changed;
 }
