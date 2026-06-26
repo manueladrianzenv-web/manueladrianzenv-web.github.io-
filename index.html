@@ -1946,8 +1946,9 @@ function alCollected(){return Object.keys(AL.col).length;}
 // Returns true when the tournament is in the knockout phase (16avos or beyond).
 // Checks if any non-grupos match has a recorded score, or if today >= first R16 date.
 function isKnockoutPhase(){
-  if(MATCHES.some(m=>m.round!=='grupos'&&(m.rg1!=null||m.g1!=null)))return true;
-  const firstR16=MATCHES.find(m=>m.round==='16avos');
+  const ms=G.m||[];
+  if(ms.some(m=>m.round!=='grupos'&&(m.rg1!=null||m.g1!=null)))return true;
+  const firstR16=ms.find(m=>m.round==='16avos');
   if(firstR16?.date&&new Date(firstR16.date)<=new Date())return true;
   return false;
 }
