@@ -733,9 +733,11 @@ function saveG(){localStorage.setItem('cod26',JSON.stringify(G));}
 function saveMe(){localStorage.setItem('cod26-me',me?JSON.stringify(me):'null');renderHdrJoin();}
 function won(a,b){return +a>+b?'t1':+b>+a?'t2':'d';}
 function done(m){return m.rg1!==null&&m.rg1!==undefined&&m.rg1!=='';}
-function locked(m){return m.date&&new Date()>=new Date(m.date);}
+// Parse date string as Colombia/Peru time (UTC-5) regardless of browser timezone
+function parsePD(ds){if(!ds)return null;return new Date(ds+'-05:00');}
+function locked(m){return m.date&&Date.now()>=parsePD(m.date);}
 function tl(m){
-  if(!m.date)return null;const d=new Date(m.date)-Date.now();if(d<=0)return null;
+  if(!m.date)return null;const d=parsePD(m.date)-Date.now();if(d<=0)return null;
   const h=Math.floor(d/3600000),mn=Math.floor((d%3600000)/60000),s=Math.floor((d%60000)/1000);
   if(h>=24)return Math.floor(h/24)+'d '+(h%24)+'h';
   if(h>0)return h+'h '+mn+'m';if(mn>0)return mn+'m '+s+'s';return s+'s';
@@ -743,7 +745,7 @@ function tl(m){
 // Returns {text, cls} for the large countdown bar — MM:SS in last hour
 function cdFmt(m){
   if(!m.date)return null;
-  const d=new Date(m.date)-Date.now();
+  const d=parsePD(m.date)-Date.now();
   if(d<=0)return null;
   const h=Math.floor(d/3600000),mn=Math.floor((d%3600000)/60000),s=Math.floor((d%60000)/1000);
   let text,cls='';
@@ -751,11 +753,11 @@ function cdFmt(m){
   else if(h>=1){text=h+'h '+String(mn).padStart(2,'0')+'m';cls='';}
   else if(mn>=1||s>0){text=String(mn).padStart(2,'0')+':'+String(s).padStart(2,'0');cls=mn<10?'cd-hot':'';}
   else{text='00:00';cls='cd-crit';}
-  if(d<300000)cls='cd-crit'; // <5 min always critical
+  if(d<300000)cls='cd-crit';
   else if(d<3600000&&cls==='')cls='cd-hot';
   return{text,cls};
 }
-function hot(m){if(!m.date)return false;const d=new Date(m.date)-Date.now();return d>0&&d<3600000;}
+function hot(m){if(!m.date)return false;const d=parsePD(m.date)-Date.now();return d>0&&d<3600000;}
 function calcPts(m,pred){
   if(!done(m)||!pred||pred.g1===undefined||pred.g1===null)return null;
   const rv=won(m.rg1,m.rg2),pv=won(pred.g1,pred.g2),rp=RND_PTS[m.round]||2;
@@ -794,6 +796,14 @@ function totals(pid){
 function fmtDate(ds){if(!ds)return'';const d=new Date(ds);return d.toLocaleDateString('es-AR',{weekday:'long',day:'numeric',month:'long'});}
 function fmtTime(ds){if(!ds)return'';return new Date(ds).toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'});}
 function dayKey(ds){if(!ds)return'zz';try{return new Date(ds).toISOString().slice(0,10);}catch(e){return'zz';}}
+function fmtPeru(ds){
+  if(!ds)return'';
+  const dp=ds.slice(0,10),tp=ds.length>10?ds.slice(11,16):'';
+  const [,mo,d]=dp.split('-');
+  const dow=['dom','lun','mar','mié','jue','vie','sáb'][new Date(dp+'T12:00').getDay()];
+  const mon=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'][+mo-1];
+  return tp?`${dow} ${+d} ${mon} · ${tp}`:`${dow} ${+d} ${mon}`;
+}
 // ─── NAV ───
 function go(id){
   document.querySelectorAll('.sc').forEach(s=>s.classList.remove('on'));
@@ -1226,7 +1236,7 @@ function mcHtml(m,pid,editable,qual){
     return'';
   };
   const grpBadge=m.group?`<span class="grp-pill">${m.group}</span>`:'';
-  const timeBadge=m.date&&!d?`<span style="font-size:9.5px;color:var(--t3);font-weight:600">${fmtTime(m.date)}</span>`:'';
+  const timeBadge=m.date?`<span style="font-size:9.5px;color:var(--t3);font-weight:600">${fmtPeru(m.date)}<span style="font-size:8px;color:var(--t4);margin-left:3px">COL/PER</span></span>`:'';
   const cdBadge=tlv&&!d?`<span class="cd ${hott?'hot':''}" id="cd-${m.id}-${pid||'v'}">${tlv}</span>`:'';
   const statusBadge=d?`<span class="badge b-done">RESULTADO</span>`:lk?`<span class="badge b-lock">🔒 EN CURSO</span>`:`<span class="badge b-open">ABIERTO</span>`;
   const cdf=!d&&m.date&&!lk?cdFmt(m):null;
@@ -2807,7 +2817,7 @@ async function autoFetchResults(){
   const pending=(G.m||[]).filter(m=>{
     if(m.rg1!=null&&m.rg2!=null)return false;
     if(!m.date)return false;
-    const t=new Date(m.date);
+    const t=parsePD(m.date);
     const mins=(now-t)/60000;
     return mins>=-10&&mins<=180; // desde 10min antes hasta 3h después del inicio
   });
@@ -2858,7 +2868,7 @@ function scheduleMatchAlerts(){
   const now=new Date();
   (G.m||[]).forEach(m=>{
     if((m.rg1!=null&&m.rg2!=null)||!m.date)return;
-    const matchTime=new Date(m.date);
+    const matchTime=parsePD(m.date);
     const alertAt=matchTime.getTime()-15*60*1000;
     const delay=alertAt-now.getTime();
     if(delay<0||_notifScheduled.has(m.id))return;
@@ -2974,7 +2984,7 @@ async function autoSync(force=false){
   if(!key||_syncing)return;
   const now=Date.now();
   // Live window: within 3h of any match kickoff
-  const live=G.m.some(m=>m.date&&now>=new Date(m.date).getTime()-60000&&now<=new Date(m.date).getTime()+10800000);
+  const live=G.m.some(m=>m.date&&now>=parsePD(m.date).getTime()-60000&&now<=parsePD(m.date).getTime()+10800000);
   const cooldown=live?180000:1800000; // 3 min live, 30 min quiet
   if(!force&&now-_lastFixSync<cooldown)return;
   _syncing=true;
