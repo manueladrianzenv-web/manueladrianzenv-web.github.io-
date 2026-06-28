@@ -424,8 +424,8 @@ select.fi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
     <div style="display:flex;align-items:center;gap:10px">
       <div style="font-size:32px">🎁</div>
       <div style="flex:1">
-        <div id="daily-limit-label" style="font-size:13px;font-weight:900;color:var(--t1)">100 sobres gratis por día</div>
-        <div style="font-size:10px;color:var(--t3);margin-top:2px">Se recargan cada medianoche · 5 figuritas por sobre</div>
+        <div id="daily-limit-label" style="font-size:13px;font-weight:900;color:var(--t1)">20 sobres gratis por día</div>
+        <div style="font-size:10px;color:var(--t3);margin-top:2px">Se recargan cada medianoche · 5 figuritas por sobre · 👑 doradas raras</div>
       </div>
       <button class="btn btn-g" style="font-size:11px;white-space:nowrap" onclick="checkDailyRefill();updateAlStats()">Verificar</button>
     </div>
@@ -848,7 +848,7 @@ function renderLB(){
     const pz2=G.prizes;const prz=rk===1?pz2.p1:rk===2?pz2.p2:rk===3?pz2.p3:rk===tot?pz2.p4:'';
     return`<div class="rrow ${isMe?'me':''}" onclick="qFicha('${p.id}')"><div style="font-size:12px;font-weight:900;color:var(--t4);min-width:22px;text-align:center">${rk}</div><div class="av a${p.i%10}" style="width:38px;height:38px">${p.emoji||p.name[0]}</div><div class="ri"><div class="rn">${p.name}${isMe?' <span style="font-size:7px;background:var(--pb);color:#a78bfa;padding:1px 5px;border-radius:4px;font-weight:800">TÚ</span>':''} ${prz?`<span style="font-size:7.5px;background:var(--ga);color:var(--gold);padding:1px 5px;border-radius:4px;font-weight:800">${prz}</span>`:''}</div><div class="rs">✅ ${p.ok} exactos · ⚡ ${p.part} parciales · ⚽ ${p.played} partidos</div></div><div class="ptsd"><div class="ptsb">${p.pts}</div><div class="ptsl">PTS</div></div></div>`;
   }).join('');
-  const albumBanner=`<div onclick="go('al')" style="cursor:pointer;background:linear-gradient(135deg,#7c3aed,#6d28d9);border-radius:16px;padding:12px 16px;margin-bottom:12px;display:flex;align-items:center;gap:12px;box-shadow:0 4px 20px rgba(124,58,237,.25)"><div style="font-size:36px">🃏</div><div style="flex:1"><div style="font-size:13px;font-weight:900;color:#fff">¡Álbum de Figuritas 2026!</div><div style="font-size:10px;color:rgba(255,255,255,.8);margin-top:2px">48 selecciones · 1.248 figuritas · 3 fotos reales por país</div></div><div style="font-size:22px">→</div></div>`;
+  const albumBanner=`<div onclick="go('al')" style="cursor:pointer;background:linear-gradient(135deg,#7c3aed,#6d28d9);border-radius:16px;padding:12px 16px;margin-bottom:12px;display:flex;align-items:center;gap:12px;box-shadow:0 4px 20px rgba(124,58,237,.25)"><div style="font-size:36px">🃏</div><div style="flex:1"><div style="font-size:13px;font-weight:900;color:#fff">¡Álbum Fase Eliminatoria!</div><div style="font-size:10px;color:rgba(255,255,255,.8);margin-top:2px">32 clasificadas · 832 figuritas · fotos reales · 20 sobres/día</div></div><div style="font-size:22px">→</div></div>`;
   document.getElementById('lb-list').innerHTML=albumBanner+html;
 }
 function qFicha(pid){document.getElementById('fi-sel').value=pid;renderFicha();go('fi');}
@@ -1300,7 +1300,7 @@ function renderPR(){
     <div style="font-size:28px">🃏</div>
     <div>
       <div style="font-size:12px;font-weight:800;color:var(--p)">Álbum de Figuritas GRATIS</div>
-      <div style="font-size:10px;color:var(--t3);margin-top:2px">48 países · 1.248 jugadores · 3 fotos reales por selección</div>
+      <div style="font-size:10px;color:var(--t3);margin-top:2px">32 clasificadas · 832 figuritas · fotos reales · 👑 figuritas doradas raras</div>
     </div>
   </div>
   <div style="display:flex;gap:8px">
@@ -1755,7 +1755,7 @@ function donutChart(col,total){
   </svg>`;
 }
 function renderAlbum(){
-  loadALForUser();updateAlStats();checkDailyRepos();renderRepos();buildAlTabs();renderAlbumGrid();renderAlbumRanking();
+  loadALForUser();migrateToKnockout();updateAlStats();checkDailyRepos();renderRepos();buildAlTabs();renderAlbumGrid();renderAlbumRanking();
 }
 // ─── REPOSITORIOS DE INTERCAMBIO (16avos en adelante) ───
 const REPO_MAX_SWAPS=5;
@@ -1767,7 +1767,7 @@ function generateDailyRepos(){
   return [sh.slice(0,10),sh.slice(10,20),sh.slice(20,30)];
 }
 function checkDailyRepos(){
-  if(!isOctavosPhase())return;
+  if(!isKnockoutPhase())return;
   const today=new Date().toISOString().slice(0,10);
   if(!AL.repos||AL.repos.date!==today){
     AL.repos={date:today,options:generateDailyRepos(),chosen:null,swapsUsed:0};
@@ -1777,7 +1777,7 @@ function checkDailyRepos(){
 function renderRepos(){
   const el=document.getElementById('al-repos');
   if(!el)return;
-  if(!isOctavosPhase()){el.innerHTML='';return;}
+  if(!isKnockoutPhase()){el.innerHTML='';return;}
   if(!AL.repos)return;
   const {options,chosen,swapsUsed}=AL.repos;
   const swapsLeft=REPO_MAX_SWAPS-swapsUsed;
@@ -2086,15 +2086,30 @@ function showStarBurst(el){
   document.body.appendChild(burst);
   setTimeout(()=>burst.remove(),1200);
 }
+// ─── 32 EQUIPOS CLASIFICADOS AL ROUND OF 32 (único álbum de esta fase) ───
+const QUALIFIED_TEAMS=new Set(["Sudáfrica","Canadá","Alemania","Paraguay","Países Bajos","Marruecos","Brasil","Japón","Francia","Suecia","Costa de Marfil","Noruega","México","Ecuador","Inglaterra","Rep. D. Congo","USA","Bosnia-Herz.","Bélgica","Senegal","Portugal","Croacia","España","Austria","Suiza","Argelia","Argentina","Cabo Verde","Colombia","Ghana","Australia","Egipto"]);
 const AL_PLAYERS=[];
 Object.entries(SQUADS).forEach(([country,[flag,group,players]])=>{
+  if(!QUALIFIED_TEAMS.has(country))return;
   players.forEach(([name,pos],i)=>{AL_PLAYERS.push({id:`${country}_${i}`,name,pos,country,flag,group});});
 });
-const AL_TOTAL=AL_PLAYERS.length;
-// ─── TITULARES (11 starters per team) + GOLD (top-3 per team) ───
+const AL_TOTAL=AL_PLAYERS.length; // 32 × 26 = 832
+// Migración automática a fase knockout: limpia AL.col al entrar en esta fase por primera vez
+function migrateToKnockout(){
+  if(AL.knockoutV2)return;
+  AL.col={};AL.dups={};AL.knockoutV2=true;
+  if((AL.packs||0)<20)AL.packs=20;
+  saveAL();
+}
+function alCollected(){
+  const ids=new Set(AL_PLAYERS.map(p=>p.id));
+  return Object.keys(AL.col).filter(id=>ids.has(id)).length;
+}
+// ─── TITULARES (11 starters per team) + GOLD (top-3 per team, solo clasificadas) ───
 const TITULARES=new Set();
 const GOLD=new Set();
 Object.entries(SQUADS).forEach(([country,[flag,group,players]])=>{
+  if(!QUALIFIED_TEAMS.has(country))return;
   getTitulares(players).forEach(([n])=>TITULARES.add(n));
   players.filter(([n])=>STARS.has(n)).slice(0,3).forEach(([n])=>GOLD.add(n));
 });
@@ -2111,7 +2126,7 @@ const SKIN_MAP={
   'Marruecos':'brown','Egipto':'brown','Costa de Marfil':'darkBrown','Rep. D. Congo':'darkBrown',
   'Cabo Verde':'brown','Argelia':'brown','Sudáfrica':'brown','Haití':'darkBrown','Curazao':'brown'
 };
-function alCollected(){return Object.keys(AL.col).length;}
+// alCollected defined above (filters to AL_PLAYERS ids only)
 // Returns true when the tournament is in the knockout phase (16avos or beyond).
 // Checks if any non-grupos match has a recorded score, or if today >= first R16 date.
 function isKnockoutPhase(){
@@ -2134,7 +2149,11 @@ function isOctavosPhase(){
 // Returns null if the name looks like an abbreviation (e.g. "L. Messi") and has no mapping.
 function wikiTitle(name){
   if(PLAYER_WIKI[name])return PLAYER_WIKI[name];
-  if(/\.\s/.test(name)||/^[A-ZÁÉÍÓÚ]\.$/.test(name.split(' ')[0]))return null;
+  // For abbreviated names (e.g. "L. Messi") try the surname only as a last resort
+  if(/^[A-ZÁÉÍÓÚ]\.\s/.test(name)){
+    const surname=name.replace(/^[A-ZÁÉÍÓÚ]\.\s*/,'').trim();
+    return surname.replace(/ /g,'_')||name.replace(/ /g,'_');
+  }
   return name.replace(/ /g,'_');
 }
 // pNew formula tuned so a fully-dedicated player (100 packs/day every day) completes
@@ -2145,8 +2164,14 @@ function weightedPick(){
   const uncol=AL_PLAYERS.filter(p=>!AL.col[p.id]);
   const ratio=uncol.length/AL_TOTAL;
   const pNew=calcPNew(ratio);
-  if(Math.random()<pNew&&uncol.length>0)return{...smartPickUncol(uncol),isNew:true};
-  return{...AL_PLAYERS[Math.floor(Math.random()*AL_TOTAL)],isNew:false};
+  function _pick(){
+    if(Math.random()<pNew&&uncol.length>0)return{...smartPickUncol(uncol),isNew:true};
+    return{...AL_PLAYERS[Math.floor(Math.random()*AL_TOTAL)],isNew:false};
+  }
+  const p=_pick();
+  // GOLD figuritas son 4× más raras — re-pick con 75% de probabilidad si sale una
+  if(GOLD.has(p.name)&&Math.random()<0.75)return _pick();
+  return p;
 }
 // Smart picker: country-weighted, with progressive bonus for near-complete teams
 // ≤2 remaining → 5×, ≤5 remaining → 3× (stronger endgame pull than before)
@@ -2204,12 +2229,12 @@ function showReveal(cards){
         </div>
         <div style="flex:1;min-width:0">
           <div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap">
-            ${isGold?'<span style="font-size:13px">👑</span>':''}
+            ${isGold?'<span style="font-size:13px">👑⭐</span>':''}
             <span style="font-size:15px;font-weight:900;color:${isGold?'#fbbf24':'#fff'};overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.name}</span>
             ${isStar&&!isGold?'<span style="font-size:13px">⭐</span>':''}
           </div>
           <div style="font-size:11px;color:var(--t3);margin-top:1px">${p.country} · ${posL[p.pos]} · <span style="color:${posC[p.pos]};font-weight:800">#${JERSEYS[p.name]||'—'}</span></div>
-          ${isGold?'<div style="font-size:9px;letter-spacing:1.2px;color:#f59e0b;font-weight:800;margin-top:3px;text-transform:uppercase">✨ Figurita Dorada</div>':''}
+          ${isGold?'<div style="font-size:9px;letter-spacing:1.2px;color:#f59e0b;font-weight:800;margin-top:3px;text-transform:uppercase">⭐ Figurita Dorada ⭐</div>':''}
           ${isTit&&!isGold?'<div style="font-size:8px;color:#a78bfa;margin-top:2px">👕 Titular</div>':''}
           ${!p.isNew?`<div style="font-size:8px;color:#f87171;margin-top:2px">🗂 Acumulada en repetidas</div>`:''}
         </div>
@@ -2478,15 +2503,15 @@ function generateOnePack(){
   for(let i=0;i<5;i++){
     const uncol=AL_PLAYERS.filter(p=>!tempCol.has(p.id));
     const ratio=uncol.length/AL_TOTAL;
-    // 200% vs pure random: formula ensures 62-97% chance of new card at every stage
     const pNew=calcPNew(ratio);
     let p;
-    if(Math.random()<pNew&&uncol.length>0){
-      p={...smartPickUncol(uncol),isNew:true};
-      tempCol.add(p.id);
-    }else{
-      p={...AL_PLAYERS[Math.floor(Math.random()*AL_TOTAL)],isNew:false};
+    function _pickOne(){
+      if(Math.random()<pNew&&uncol.length>0){const r={...smartPickUncol(uncol),isNew:true};tempCol.add(r.id);return r;}
+      return{...AL_PLAYERS[Math.floor(Math.random()*AL_TOTAL)],isNew:false};
     }
+    p=_pickOne();
+    // GOLD figuritas son 4× más raras
+    if(GOLD.has(p.name)&&Math.random()<0.75)p=_pickOne();
     cards.push(p);
   }
   return cards;
