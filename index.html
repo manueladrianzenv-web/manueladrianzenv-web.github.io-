@@ -689,19 +689,29 @@ let aOpen=false,curRnd='grupos',resPen=null,resHalf=null,me=null,selEmoji='⚽',
 const GOLES_INIT=[
   {name:'Lionel Messi',team:'Argentina',flag:'🇦🇷',goals:5},
   {name:'Kylian Mbappé',team:'Francia',flag:'🇫🇷',goals:4},
+  {name:'Ousmane Dembélé',team:'Francia',flag:'🇫🇷',goals:4},
   {name:'Erling Haaland',team:'Noruega',flag:'🇳🇴',goals:4},
-  {name:'Deniz Undav',team:'Alemania',flag:'🇩🇪',goals:3},
+  {name:'Vinicius Jr.',team:'Brasil',flag:'🇧🇷',goals:4},
   {name:'Jonathan David',team:'Canadá',flag:'🇨🇦',goals:3},
-  {name:'Vinicius Jr.',team:'Brasil',flag:'🇧🇷',goals:2},
+  {name:'Deniz Undav',team:'Alemania',flag:'🇩🇪',goals:3},
+  {name:'Johan Manzambi',team:'Suiza',flag:'🇨🇭',goals:3},
+  {name:'Matheus Cunha',team:'Brasil',flag:'🇧🇷',goals:3},
+  {name:'Ismael Saibari',team:'Marruecos',flag:'🇲🇦',goals:3},
+  {name:'Brian Brobbey',team:'Países Bajos',flag:'🇳🇱',goals:3},
+  {name:'Ismaila Sarr',team:'Senegal',flag:'🇸🇳',goals:3},
+  {name:'Harry Kane',team:'Inglaterra',flag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿',goals:2},
+  {name:'Cristiano Ronaldo',team:'Portugal',flag:'🇵🇹',goals:2},
   {name:'Cody Gakpo',team:'Países Bajos',flag:'🇳🇱',goals:2},
-  {name:'Ayase Ueda',team:'Japón',flag:'🇯🇵',goals:2},
+  {name:'Folarin Balogun',team:'USA',flag:'🇺🇸',goals:2},
+  {name:'Leandro Trossard',team:'Bélgica',flag:'🇧🇪',goals:2},
   {name:'Mikel Oyarzabal',team:'España',flag:'🇪🇸',goals:2},
-  {name:'Folarin Balogun',team:'EE.UU.',flag:'🇺🇸',goals:2},
+  {name:'Julián Quiñones',team:'México',flag:'🇲🇽',goals:2},
+  {name:'Ayase Ueda',team:'Japón',flag:'🇯🇵',goals:2},
 ];
 function loadG(){
   try{const s=localStorage.getItem('cod26');if(s){G={...G,...JSON.parse(s)};if(!G.prizes)G.prizes={p1:'',p2:'',p3:'',p4:''};}}catch(e){}
   if(!G.m)G.m=[];
-  if(!G.goles||G.goles.length<10){G.goles=GOLES_INIT.map(g=>({...g}));}
+  if(!G.goles||G.goles.length<GOLES_INIT.length){G.goles=GOLES_INIT.map(g=>({...g}));}
   const _eIds=new Set(G.m.map(m=>m.id));
   const _toAdd=PRESET.map((m,i)=>({pen:null,firstScorer:null,halfGoal:null,...m,id:'p'+i,rg1:'rg1' in m?m.rg1:null,rg2:'rg2' in m?m.rg2:null})).filter(m=>!_eIds.has(m.id));
   if(_toAdd.length){G.m=[...G.m,..._toAdd];}
