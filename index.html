@@ -1107,6 +1107,7 @@ const PLAYER_WIKI={
   'Tau':'Percy_Tau',
   // Senegal extra
   'F. Mendy':'Ferland_Mendy',
+};
 // ── Extensión masiva: todos los jugadores de los 32 clasificados ──
 Object.assign(PLAYER_WIKI,{
   // Argentina
@@ -1322,7 +1323,6 @@ Object.assign(PLAYER_WIKI,{
   // Cabo Verde
   'Djaniny':'Djaniny','Stopira':'Stopira',
 });
-};
 function fetchPlayerPhoto(name,imgId,flgId){
   const title=PLAYER_WIKI[name]||name.replace(/ /g,'_');
   fetch('https://en.wikipedia.org/api/rest_v1/page/summary/'+encodeURIComponent(title))
