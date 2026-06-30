@@ -619,7 +619,7 @@ const PRESET=[
   // M73: 2°A vs 2°B – SoFi LA – Jun 28 3pm ET
   {round:'16avos',f1:'🇿🇦',t1:'Sudáfrica',f2:'🇨🇦',t2:'Canadá',date:'2026-06-28T14:00',rg1:0,rg2:1,firstScorer:'S. Eustáquio',halfGoal:false,goalMinute:"90+2'"},
   // M74: 1°E vs Mejor 3° – Gillette Boston – Jun 28 4:30pm ET
-  {round:'16avos',f1:'🇩🇪',t1:'Alemania',f2:'🇵🇾',t2:'Paraguay',date:'2026-06-29T17:30',rg1:1,rg2:1,firstScorer:'J. Enciso',halfGoal:true,goalMinute:"40'"},
+  {round:'16avos',f1:'🇩🇪',t1:'Alemania',f2:'🇵🇾',t2:'Paraguay',date:'2026-06-29T17:30',rg1:1,rg2:1,pen:'team2',firstScorer:'J. Enciso',halfGoal:true,goalMinute:"40'"},
   // M75: 1°F vs 2°C – Monterrey – Jun 28 9pm ET
   {round:'16avos',f1:'🇳🇱',t1:'Países Bajos',f2:'🇲🇦',t2:'Marruecos',date:'2026-06-29T21:00'},
   // M76: 1°C vs 2°F – NRG Houston – Jun 28 1pm ET
@@ -783,8 +783,8 @@ function calcPts(m,pred){
     else bd.push({ok:0,l:`Gol 1er tiempo: pred ${pred.halfGoal?'Sí':'No'} / real ${m.halfGoal?'Sí':'No'}`,p:0});
   }
   if(m.round!=='grupos'&&won(m.rg1,m.rg2)==='d'&&m.pen&&pred.pen){
-    if(pred.pen===m.pen){pts+=1;bd.push({ok:1,l:'Penales correctos',p:1});}
-    else bd.push({ok:0,l:'Penales incorrectos',p:0});
+    if(pred.pen===m.pen){pts+=2;bd.push({ok:1,l:'Penales: ganador correcto',p:2});}
+    else bd.push({ok:0,l:`Penales: pred ${pred.pen==='team1'?m.t1:m.t2} / ganó ${m.pen==='team1'?m.t1:m.t2}`,p:0});
   }
   return{pts,bd,max:rp};
 }
@@ -1450,7 +1450,7 @@ function mcHtml(m,pid,editable,qual){
   };
   const penH=()=>{
     if(d&&won(m.rg1,m.rg2)==='d'&&m.pen)return`<div style="text-align:center;margin-top:8px;font-size:11px;font-weight:700;color:var(--gold)">🤝 Penales: ${m.pen==='team1'?m.f1+' '+m.t1:m.f2+' '+m.t2}</div>`;
-    if(editable&&!lk&&!d&&m.round!=='grupos'){const isDr=pred?.g1!==undefined&&pred?.g2!==undefined&&+pred.g1===+pred.g2;return`<div id="pens-${m.id}" style="display:${isDr?'block':'none'}"><div class="pen-wrap"><div class="pen-ttl">🤝 ¿Quién clasifica en penales?</div><div class="pbtns"><button class="pbtn ${pred?.pen==='team1'?'on':''}" id="pb1-${m.id}" onclick="setPen('${pid}','${m.id}','team1')">${m.f1} ${m.t1}</button><button class="pbtn ${pred?.pen==='team2'?'on':''}" id="pb2-${m.id}" onclick="setPen('${pid}','${m.id}','team2')">${m.f2} ${m.t2}</button></div></div></div>`;}
+    if(editable&&!lk&&!d&&m.round!=='grupos'){const isDr=pred?.g1!==undefined&&pred?.g2!==undefined&&+pred.g1===+pred.g2;return`<div id="pens-${m.id}" style="display:${isDr?'block':'none'}"><div class="pen-wrap"><div class="pen-ttl">🤝 ¿Quién clasifica en penales? <span class="xtag" style="margin-left:5px">+2 pts</span></div><div class="pbtns"><button class="pbtn ${pred?.pen==='team1'?'on':''}" id="pb1-${m.id}" onclick="setPen('${pid}','${m.id}','team1')">${m.f1} ${m.t1}</button><button class="pbtn ${pred?.pen==='team2'?'on':''}" id="pb2-${m.id}" onclick="setPen('${pid}','${m.id}','team2')">${m.f2} ${m.t2}</button></div></div></div>`;}
     if(!editable&&pred?.pen&&!d&&m.round!=='grupos')return`<div style="text-align:center;margin-top:7px;font-size:10px;color:var(--gold);font-weight:700">Penales: ${pred.pen==='team1'?m.f1+' '+m.t1:m.f2+' '+m.t2}</div>`;
     return'';
   };
@@ -3004,6 +3004,7 @@ function _fixPresetErrors(){
     if(pm.firstScorer!=null&&stored.firstScorer==null){stored.firstScorer=pm.firstScorer;changed=true;}
     if(pm.halfGoal!=null&&stored.halfGoal==null){stored.halfGoal=pm.halfGoal;changed=true;}
     if(pm.goalMinute!=null&&stored.goalMinute==null){stored.goalMinute=pm.goalMinute;changed=true;}
+    if(pm.pen!=null&&stored.pen==null){stored.pen=pm.pen;changed=true;}
   });
   return changed;
 }
