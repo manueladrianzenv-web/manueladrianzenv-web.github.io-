@@ -3015,6 +3015,10 @@ function _fixPresetErrors(){
     if(pm.goalMinute!=null&&stored.goalMinute==null){stored.goalMinute=pm.goalMinute;changed=true;}
     if(pm.pen!=null&&stored.pen==null){stored.pen=pm.pen;changed=true;}
   });
+  // Force-sync goles table whenever version or length is stale
+  if(!G.goles||G.goles.length<GOLES_INIT.length||G.golesV!==GOLES_V){
+    G.goles=GOLES_INIT.map(g=>({...g}));G.golesV=GOLES_V;changed=true;
+  }
   return changed;
 }
 function _mergePreset(){
